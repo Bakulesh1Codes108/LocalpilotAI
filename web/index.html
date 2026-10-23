@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LocalPilot</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%2300a884'/><path d='M10 13h12v8a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3z' fill='white'/><circle cx='13.5' cy='17' r='1.5' fill='%2300a884'/><circle cx='18.5' cy='17' r='1.5' fill='%2300a884'/><path d='M16 9v4' stroke='white' stroke-width='2'/></svg>">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="topband"></div>
+<div class="app" id="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <header class="side-head">
+      <div class="avatar bot" aria-hidden="true"></div>
+      <div class="side-title">
+        <strong id="botName">LocalPilot</strong>
+        <span class="muted small" id="modelLine">connecting…</span>
+      </div>
+      <button class="icon-btn mobile-only" id="closeSide" title="Back to chat" aria-label="Back to chat">✕</button>
+    </header>
+
+    <div class="mode-box">
+      <label for="modeSel" class="small muted">Safety mode</label>
+      <select id="modeSel" aria-label="Safety mode">
+        <option value="readonly">🔒 Read-only — looks, never changes</option>
+        <option value="careful">🛡 Careful — asks before every change</option>
+        <option value="trusted">⚡ Trusted — auto small changes, asks for risky ones</option>
+      </select>
+      <label class="toggle small"><input type="checkbox" id="autofix" checked> ✏️ Auto-fix my typos before acting</label>
+    </div>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="tasks" role="tab">Tasks</button>
+      <button class="tab" data-tab="system" role="tab">System</button>
+      <button class="tab" data-tab="log" role="tab">Activity</button>
+    </nav>
+
+    <section class="pane active" id="pane-tasks">
+      <form id="taskForm" class="card form">
+        <div class="form-title">⏰ New scheduled task</div>
+        <input name="name" placeholder="Name, e.g. Morning tech news" required maxlength="80">
+        <textarea name="prompt" rows="3" placeholder="What should I do? e.g. Search the web for today's top AI news and save a summary to news.md" required></textarea>
+        <div class="row">
+          <select name="trigger_type" id="trigType">
+            <option value="cron">Repeat (cron)</option>
+            <option value="interval">Every N minutes</option>
+            <option value="once">Once at</option>
+          </select>
+          <input name="trigger_value" id="trigVal" placeholder="0 9 * * 1-5" required>
+        </div>
+        <div class="hint small muted" id="trigHint">Cron: minute hour day month weekday — “0 9 * * 1-5” = weekdays 9:00</div>
+        <button class="btn primary" type="submit">Add task</button>
+        <div class="small err" id="taskErr" role="alert"></div>
+      </form>
+      <div id="taskList"></div>
+    </section>
+
+    <section class="pane" id="pane-system">
+      <div class="card">
+        <div class="form-title">🧠 Model</div>
+        <div class="kv"><span>Status</span><b id="llmStatus">–</b></div>
+        <div class="kv"><span>Active model</span><b id="activeModel">–</b></div>
+        <div class="kv"><span>Recommended for this PC</span><b id="recModel">–</b></div>
+        <div class="small muted" id="recWhy"></div>
+        <div class="small warn" id="modelNote"></div>
+        <div class="row">
+          <select id="installedSel" aria-label="Installed models"></select>
+          <button class="btn" id="useModel">Use</button>
+        </div>
+        <div class="row">
+          <input id="pullName" placeholder="qwen3:8b">
+          <button class="btn primary" id="pullBtn">Download</button>
+        </div>
+        <div class="progress" hidden id="pullBar"><div></div></div>
+        <div class="small muted" id="pullText"></div>
+      </div>
+      <div class="card">
+        <div class="form-title">🛡 LAYA safety layer</div>
+        <div class="kv"><span>Status</span><b id="layaStatus">–</b></div>
+        <div class="small muted">A small, fast decision model that double-checks commands and scans web pages for
+          prompt-injection. It can only make LocalPilot stricter. Install: <code>pip install laya</code></div>
+        <div class="small err" id="layaErr"></div>
+      </div>
+      <div class="card">
+        <div class="form-title">🖥 This PC</div>
+        <div id="hwBox" class="small"></div>
+      </div>
+      <div class="card">
+        <div class="form-title">📁 Workspace</div>
+        <div class="small mono" id="wsPath"></div>
+        <div class="small muted">New files, clones and screenshots go here unless you name another folder.</div>
+      </div>
+    </section>
+
+    <section class="pane" id="pane-log">
+      <div class="row between"><span class="small muted">Every action the agent proposed or took</span>
+        <button class="btn" id="refreshLog">Refresh</button></div>
+      <div id="logList"></div>
+    </section>
+  </aside>
+
+  <!-- ============ CHAT ============ -->
+  <main class="chat">
+    <header class="chat-head">
+      <button class="icon-btn mobile-only" id="openSide" title="Menu" aria-label="Open menu">☰</button>
+      <div class="avatar bot" aria-hidden="true"></div>
+      <div class="chat-title">
+        <strong id="chatName">LocalPilot</strong>
+        <span class="small" id="presence">connecting…</span>
+      </div>
+      <div class="spacer"></div>
+      <span class="mode-pill" id="modePill">careful</span>
+      <button class="icon-btn" id="newChat" title="New chat" aria-label="New chat">
+        <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>
+      </button>
+    </header>
+
+    <div class="messages" id="messages" aria-live="polite">
+      <div class="day-chip">TODAY</div>
+      <div class="sys-chip">🔒 Runs 100% on your PC. Changes need your approval.</div>
+      <div id="welcome" class="welcome">
+        <div class="bubble in">
+          <p><b>Hi! I'm your local AI agent.</b> I can search the web, browse sites, manage files, run commands,
+          set up git repos, install tools and schedule tasks — and I'll ask before changing anything.</p>
+          <div class="chips" id="suggestions">
+            <button class="chip">Check my PC specs and tell me which model fits best</button>
+            <button class="chip">Search the web for the latest Python release and summarize it</button>
+            <button class="chip">Create a new git repo called demo-app in my workspace with a README and .gitignore</button>
+            <button class="chip">Find all PDF files in my Downloads folder</button>
+            <button class="chip">Every weekday at 9am, search top AI news and save a summary to news.md</button>
+          </div>
+        </div>
+      </div>
+      <div id="stream"></div>
+      <div class="typing" id="typing" hidden><span></span><span></span><span></span></div>
+    </div>
+
+    <div class="suggest-bar" id="suggestBar" hidden></div>
+    <footer class="composer">
+      <button class="fix-btn" id="fixBtn" title="Fix typos in what I typed" aria-label="Fix typos">✨</button>
+      <textarea id="input" rows="1" placeholder="Type a message" aria-label="Message" spellcheck="true" autocorrect="on" autocapitalize="sentences"></textarea>
+      <button class="send" id="sendBtn" title="Send" aria-label="Send">
+        <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M1.1 21.8 23 12 1.1 2.2 1 9.8l15.7 2.2L1 14.2z"/></svg>
+      </button>
+      <button class="send stop" id="stopBtn" title="Stop" aria-label="Stop" hidden>
+        <svg viewBox="0 0 24 24" width="18" height="18"><rect x="5" y="5" width="14" height="14" rx="2" fill="currentColor"/></svg>
+      </button>
+    </footer>
+  </main>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

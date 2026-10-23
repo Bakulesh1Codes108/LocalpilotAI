@@ -1,0 +1,45 @@
+# LocalPilot configuration. Every value is optional; defaults live in agent/config.py.
+
+llm:
+  provider: ollama              # ollama | openai (any OpenAI-compatible server: LM Studio, llama.cpp, vLLM)
+  base_url: http://localhost:11434   # LM Studio: http://localhost:1234   llama.cpp: http://localhost:8080
+  model: auto                   # "auto" picks the best model for your PC, or set e.g. qwen3:8b
+  temperature: 0.2
+  num_ctx: 8192                 # context window; raise to 16384+ if you have RAM/VRAM to spare
+  timeout: 300
+
+agent:
+  name: LocalPilot
+  mode: careful                 # readonly | careful | trusted
+  max_steps: 15                 # hard stop per request (anti-loop)
+  workspace: ~/LocalPilot-Workspace
+  allowed_dirs:                 # writes outside these folders are treated as HIGH risk
+    - "~"
+  shell_timeout: 180
+  autofix_typos: true           # fix typos in your messages before acting (toggle in the UI too)
+
+search:
+  provider: duckduckgo          # duckduckgo (no key needed) | searxng (self-hosted, fully private)
+  searxng_url: http://localhost:8080
+  max_results: 6
+
+laya:                           # LAYA safety layer - optional, install with:  pip install laya
+  enabled: auto                 # auto = use if installed | true | false
+  injection_threshold: 0.8      # warn when web/file content looks like a prompt-injection attempt
+  destructive_threshold: 0.85   # escalate a command/file action to "always ask"
+  default: multilingual         # multilingual (Hinglish, 100+ languages) | english
+
+browser:
+  headless: true                # false = watch the browser work
+
+scheduler:
+  approval_timeout: 900         # seconds a scheduled task waits for your approval before skipping the action
+
+server:
+  host: 127.0.0.1               # keep local! the agent can control your PC
+  port: 7860
+  open_browser: true
+
+safety:
+  extra_blocked_patterns: []    # regexes that are never allowed, e.g. ["\\bgit\\s+push\\b.*\\bmain\\b"]
+  extra_high_risk_patterns: []  # regexes that always need approval

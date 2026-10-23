@@ -1,0 +1,3 @@
+# Optional LAYA safety layer (Convai Innovations, Apache-2.0). Pulls in PyTorch + transformers.
+# Model weights download from Hugging Face on first use: convaiinnovations/laya
+laya>=0.4.14
