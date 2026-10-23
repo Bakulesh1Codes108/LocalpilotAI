@@ -14,7 +14,7 @@ Everything runs **on your own PC** with free, open models: no account, no API ke
 1. **Download:** [**⬇ Download ZIP**](https://github.com/Bakulesh1Codes108/LocalpilotAI/archive/refs/heads/main.zip) → right-click → **Extract All**
    (or `git clone https://github.com/Bakulesh1Codes108/LocalpilotAI.git`)
 2. **Install:** double-click **`install.bat`** (sets up Python, Ollama, the right AI model for your PC; asks before each step)
-3. **Run:** double-click **`LocalPilot.bat`** → it opens in your browser at http://127.0.0.1:7860
+3. **Run:** double-click **`LocalPilot.bat`** → it opens in your browser at http://127.0.0.1:8484
 
 Needs Windows 10/11, 8 GB RAM (16 GB recommended), ~10 GB disk.
 Full guide with troubleshooting: **[docs/WINDOWS.md](docs/WINDOWS.md)** · macOS/Linux: `bash scripts/setup.sh` then `bash scripts/start.sh`

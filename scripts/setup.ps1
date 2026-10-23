@@ -99,5 +99,5 @@ if (Ask "Create a 'LocalPilot' shortcut on your Desktop?" $true) {
 }
 
 Write-Host "`nAll set! Start LocalPilot by double-clicking LocalPilot.bat (or the Desktop shortcut)." -ForegroundColor Green
-Write-Host "It opens in your browser at http://127.0.0.1:7860"
+Write-Host "It opens in your browser at http://127.0.0.1:8484"
 if (Ask "Start LocalPilot now?" $true) { Start-Process (Join-Path $Root "LocalPilot.bat") }

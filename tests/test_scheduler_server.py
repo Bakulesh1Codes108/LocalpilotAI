@@ -32,7 +32,7 @@ def client(cfg, fake_llm, tmp_path, monkeypatch):
     monkeypatch.setattr(srv, "DATA_DIR", tmp_path / "data")
     llm = fake_llm([[("list_dir", {"path": "."})], [("write_file", {"path": "w.txt", "content": "hey"})], "All done"])
     app = srv.create_app(cfg, llm)
-    with TestClient(app, base_url="http://127.0.0.1:7860") as c:
+    with TestClient(app, base_url="http://127.0.0.1:8484") as c:
         yield c
 
 
@@ -58,7 +58,7 @@ def test_mode_and_cross_origin_block(client):
 
 
 def test_websocket_chat_with_approval(client, cfg):
-    with client.websocket_connect("/ws", headers={"Host": "127.0.0.1:7860"}) as ws:
+    with client.websocket_connect("/ws", headers={"Host": "127.0.0.1:8484"}) as ws:
         ws.send_json({"type": "hello", "session": "s1"})
         assert ws.receive_json()["type"] == "hello"
         ws.send_json({"type": "chat", "text": "list then write"})
@@ -79,7 +79,7 @@ def test_websocket_chat_with_approval(client, cfg):
 def test_websocket_rejects_foreign_origin(client):
     from starlette.websockets import WebSocketDisconnect
     with pytest.raises(WebSocketDisconnect):
-        with client.websocket_connect("/ws", headers={"Host": "127.0.0.1:7860", "Origin": "https://evil.example"}) as ws:
+        with client.websocket_connect("/ws", headers={"Host": "127.0.0.1:8484", "Origin": "https://evil.example"}) as ws:
             ws.receive_json()
 
 
@@ -89,8 +89,8 @@ def test_autofix_in_chat_and_fix_endpoint(cfg, fake_llm, tmp_path, monkeypatch):
     cfg["agent"]["autofix_typos"] = True
     llm = fake_llm(["install git please", "Done.", "list my files"])
     app = srv.create_app(cfg, llm, start_scheduler=False)
-    with TestClient(app, base_url="http://127.0.0.1:7860") as c:
-        with c.websocket_connect("/ws", headers={"Host": "127.0.0.1:7860"}) as ws:
+    with TestClient(app, base_url="http://127.0.0.1:8484") as c:
+        with c.websocket_connect("/ws", headers={"Host": "127.0.0.1:8484"}) as ws:
             ws.send_json({"type": "hello", "session": "fx"})
             ws.receive_json()
             ws.send_json({"type": "chat", "text": "isntall gti plz"})
@@ -116,8 +116,8 @@ def test_typo_clarify_question_over_websocket(cfg, fake_llm, tmp_path, monkeypat
                       "options": ["move the video", "move the .mov file"]})
     llm = fake_llm([fix, "Moved it."])
     app = srv.create_app(cfg, llm, start_scheduler=False)
-    with TestClient(app, base_url="http://127.0.0.1:7860") as c:
-        with c.websocket_connect("/ws", headers={"Host": "127.0.0.1:7860"}) as ws:
+    with TestClient(app, base_url="http://127.0.0.1:8484") as c:
+        with c.websocket_connect("/ws", headers={"Host": "127.0.0.1:8484"}) as ws:
             ws.send_json({"type": "hello", "session": "cq"})
             ws.receive_json()
             ws.send_json({"type": "chat", "text": "mov the vid"})

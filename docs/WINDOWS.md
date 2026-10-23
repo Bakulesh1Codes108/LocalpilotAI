@@ -37,7 +37,7 @@ Open the folder and **double-click `install.bat`**. It walks you through 7 steps
 ## 3. Start
 
 Double-click **`LocalPilot.bat`** (or the Desktop shortcut). A black window opens (keep it open, since it
-*is* LocalPilot) and your browser opens **http://127.0.0.1:7860**. Close the black window to stop LocalPilot.
+*is* LocalPilot) and your browser opens **http://127.0.0.1:8484**. Close the black window to stop LocalPilot.
 
 ## 4. First things to try
 
@@ -57,7 +57,7 @@ New files go to `C:\Users\<you>\LocalPilot-Workspace` unless you name another fo
 | "Model 'qwen3:8b' is not installed" | System tab → **Download**, or run `ollama pull qwen3:8b` |
 | Very slow answers | Pick a smaller model in the System tab (e.g. `qwen3:4b`) |
 | `python` not found after installing | Close all windows and run `install.bat` again; or reinstall Python with "Add to PATH" ticked |
-| Port 7860 already in use | Change `server.port` in `config.yaml` |
+| Browser opens a different app (e.g. WanGP) | Fixed: LocalPilot uses port 8484 and, if that is busy, picks the next free port and opens only after it is ready. The window shows the exact address |
 | LAYA shows "failed" | It needs internet the first time to download weights; LocalPilot works fine without it |
 | Antivirus warns about PowerShell | LocalPilot runs commands only after you click Allow; check the Activity tab to see everything it did |
 

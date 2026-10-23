@@ -44,7 +44,7 @@ DEFAULTS: dict[str, Any] = {
         "default": "multilingual",       # LAYA checkpoint for unknown language: multilingual | english
     },
     "scheduler": {"approval_timeout": 900},
-    "server": {"host": "127.0.0.1", "port": 7860, "open_browser": True},
+    "server": {"host": "127.0.0.1", "port": 8484, "open_browser": True},
     "safety": {
         "extra_blocked_patterns": [],
         "extra_high_risk_patterns": [],

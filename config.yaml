@@ -37,7 +37,7 @@ scheduler:
 
 server:
   host: 127.0.0.1               # keep local! the agent can control your PC
-  port: 7860
+  port: 8484                    # if busy (e.g. WanGP/Gradio apps use 7860), the next free port is used
   open_browser: true
 
 safety:
